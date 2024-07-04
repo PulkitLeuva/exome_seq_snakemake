@@ -1,0 +1,41 @@
+home_dir: "/lustre/pulkit.h/snakemake_local/snakemake/"
+names: 
+  fastq: father
+  reference: genome
+  dbsnp: dbsnp
+reference_path: "/lustre/pulkit.h/snakemake_local/snakemake/input/reference/genome"
+rules_path: "/lustre/pulkit.h/snakemake_local/snakemake/rules"
+logs_path: "/lustre/pulkit.h/snakemake_local/snakemake/logs/{sample}/{sample}"
+metadata_path: "/lustre/pulkit.h/snakemake_local/snakemake/input/metadata/metadata.csv"
+benchmark_path: "/lustre/pulkit.h/snakemake_local/snakemake/benchmark/{sample}/{sample}"
+dbsnp_path: "/lustre/pulkit.h/snakemake_local/snakemake/input/dbsnp"
+sample_path: "/lustre/pulkit.h/snakemake_local/snakemake/input/sample/{sample}/{sample}"
+  #mock_path: "/lustre/pulkit.h/snakemake_local/snakemake/input/sample/mock_sample/{sample}"
+  #SRR17974076: "/lustre/pulkit.h/snakemake_local/snakemake/input/sample/SRR17974076/SRR17974076/{sample}"
+fastqc_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/fastqc/{sample}"
+mapped_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/mapped/{sample}"
+dedup_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/dedup/{sample}"
+sorted_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/sorted/{sample}"
+collect_alignment_summary_metrics_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/alignment_summary_metrics/{sample}"
+collect_gc_bias_metrics_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/gc_bias_metrics/{sample}"
+mean_quality_by_cycle_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/mean_quality_by_cycle/{sample}"
+quality_score_by_distribution_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/quality_score_by_distribution/{sample}"
+collect_insert_size_metrics_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/collect_insert_size_metrics/{sample}"
+bedtools_genomcov_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/bedtools_genomcov/{sample}"
+vcf_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/variants/{sample}"
+bcftools_stats_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/bcftools_stats/{sample}"
+select_snp_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/variants/snp/{sample}"
+select_indel_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/variants/indel/{sample}"
+snp_filter_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/variants/snp/{sample}"
+indel_filter_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/variants/indel/{sample}"
+gatk_vcf_table_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/variants_table/{sample}"
+eval_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/variants_eval/{sample}"
+variant_calling_metrics_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/qc/variants_metrics/{sample}"
+gatk_variant_annotation_path: "/lustre/pulkit.h/snakemake_local/snakemake/output/{sample}/variants_annotation/{sample}"
+
+mapping_params:
+  algo: mem
+
+qc_params:
+  collect_insert_size_metrics:
+    extra: -M 0.5

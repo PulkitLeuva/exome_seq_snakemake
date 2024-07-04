@@ -1,0 +1,111 @@
+import pandas as pd
+import time 
+start_time = time.time()
+
+report: "reports/workflow.rst"
+
+configfile: "/lustre/pulkit.h/snakemake_local/snakemake/configs/config.yaml" # configuration file
+
+
+'''# Define wildcards
+m = pd.read_csv(metadata_path)
+sample = m['sample']
+'''
+sample = config['names']['fastq']
+
+
+
+rule all:
+    input:
+        mapped = expand(f"{config['mapped_path']}.mapped.bam", sample=sample),
+        dedup_bam=expand(f"{config['dedup_path']}.dedup.bam", sample=sample),
+        dedup_metrics=expand(f"{config['dedup_path']}.dedup.metrics.txt",sample=sample),
+        sort = expand(f"{config['sorted_path']}.sorted.bam", sample=sample),
+        index = expand(f"{config['sorted_path']}.sorted.bam.bai", sample=sample),
+        #qc steps
+        fastqc_html_report1 = expand( f"{config['fastqc_path']}_R1_fastqc.html", sample=sample),
+        fastqc_zip1 = expand(f"{config['fastqc_path']}_R1_fastqc.zip", sample= sample),
+        fastqc_html_report2 = expand(f"{config['fastqc_path']}_R2_fastqc.html", sample=sample),
+        fastqc_zip2 = expand(f"{config['fastqc_path']}_R2_fastqc.zip", sample= sample),
+        alignment_summary_metrics= expand(f"{config['collect_alignment_summary_metrics_path']}.alignment_summary_metrics.txt", sample= sample),
+        gc_bias_metrics=expand(f"{config['collect_gc_bias_metrics_path']}.gc_bias_metrics.txt", sample= sample),
+        gc_bias_metrics_chart = expand(f"{config['collect_gc_bias_metrics_path']}.gc_bias_metrics.pdf", sample= sample),
+        gc_bias_metrics_summary = expand(f"{config['collect_gc_bias_metrics_path']}.gc_bias_metrics_summary_metrics.txt", sample= sample),
+        mean_quality_by_cycle_chart = expand(f"{config['mean_quality_by_cycle_path']}.mean_quality_by_cycle.pdf", sample= sample),
+        mean_quality_by_cycle_metrics=expand(f"{config['mean_quality_by_cycle_path']}.mean_quality_by_cycle.txt", sample= sample),
+        quality_score_by_distribution_chart = expand(f"{config['quality_score_by_distribution_path']}.quality_score_by_distribution.pdf", sample= sample),
+        quality_score_by_distribution_metrics=expand(f"{config['quality_score_by_distribution_path']}.quality_score_by_distribution.txt", sample= sample),
+        collect_insert_size_metrics=expand(f"{config['collect_insert_size_metrics_path']}_collect_insert_size_metrics.txt", sample= sample),
+        collect_collect_insert_size_metrics_histo = expand(f"{config['collect_insert_size_metrics_path']}_collect_insert_size_metrics_histogram.pdf", sample= sample),
+        genome_coverage=expand(f"{config['bedtools_genomcov_path']}.bedtools.bedgraph", sample= sample),
+        vcf= expand(f"{config['vcf_path']}.gatk.vcf", sample=sample),
+        bcftools_stats=expand(f"{config['bcftools_stats_path']}.vcf_stats.txt", sample = sample),
+        select_snp = expand(f"{config['select_snp_path']}.select_snp.vcf",sample= sample),
+        select_indel= expand(f"{config['select_indel_path']}.select_indel.vcf", sample= sample),
+        snp_filter= expand(f"{config['snp_filter_path']}.snp.filtered.vcf", sample= sample),
+        indel_filter = expand(f"{config['indel_filter_path']}.indel.filtered.vcf", sample= sample),
+        gatk_vcf_table = expand(f"{config['gatk_vcf_table_path']}.table", sample= sample),
+        eval_report = expand(f"{config['eval_path']}.variant_eval.txt", sample= sample),
+        #variant_calling_metrics = expand(f"{config['variant_calling_metrics_path']}.variant_calling_metrics.txt", sample=sample),
+        variant_annotation= expand(f"{config['gatk_variant_annotation_path']}.gatk_variant_annotation.vcf", sample=sample),
+# rules
+# indexing the reference
+include: f"{config['rules_path']}/index_reference.smk"
+#fastqc  
+include: f"{config['rules_path']}/fastqc.smk"
+# mapping
+include: f"{config['rules_path']}/bwa_mapping.smk"
+#mark and delete dulicates
+include: f"{config['rules_path']}/mark_duplicates.smk"
+#sorting
+include: f"{config['rules_path']}/samtools_sort.smk"
+#indexing the sorted file
+include: f"{config['rules_path']}/samtools_index.smk"
+#qc mapped file
+include: f"{config['rules_path']}/collect_alignment_summary_metrics.smk"
+#gc bias metrics qc
+include: f"{config['rules_path']}/collect_gc_bias_metrics.smk"
+#mean quality by cyle
+include: f"{config['rules_path']}/mean_quality_by_cycle.smk"
+#quality_score_by_distribution
+include: f"{config['rules_path']}/quality_score_by_distribution.smk"
+#collect_insert_size_metrics
+include: f"{config['rules_path']}/collect_insert_size_metrics.smk"
+#qc for genomve coverage
+include: f"{config['rules_path']}/bedtools_genomcov.smk"
+# to identify variants present in the sample, input is bam file and output is vcf
+include: f"{config['rules_path']}/variant_calling_gatk.smk"
+#qc for vcf stats
+include: f"{config['rules_path']}/bcftools_stats.smk"
+#select snps form vcf
+include: f"{config['rules_path']}/select_snp.smk"
+#select indel form vcf
+include: f"{config['rules_path']}/select_indel.smk"
+#filtering the snp variants
+include: f"{config['rules_path']}/snp_filter.smk"
+#filtering the indel variants
+include: f"{config['rules_path']}/indel_filter.smk"
+#vcf graph
+include: f"{config['rules_path']}/gatk_vcf_table.smk"
+#variant evaluation metrcis
+include: f"{config['rules_path']}/variant_eval.smk"
+#variant calling metrics
+include: f"{config['rules_path']}/collect_variant_calling_metrics.smk"
+#variant annotation 
+include: f"{config['rules_path']}/gatk_variant_annotation.smk"
+
+
+
+#this handler will print after successful completion of the workflow
+onsuccess:
+    print("Workflow finished, no error")
+    #shell("cat {log} | mail -s 'Workflow finished, no error' pulkithleuva@gmail.com")
+
+#if any error comes during the workflow execution this handler will report it through mail
+onerror:
+    print("An error occurred")
+    #shell("cat {log} | mail -s 'Error in Snakemake workflow' pulkithleuva@gmail.com")
+end_time = time.time()
+
+elapsed_time = end_time - start_time
+print(f"Workflow completed in {elapsed_time:.2f} seconds.")

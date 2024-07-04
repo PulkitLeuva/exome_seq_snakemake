@@ -1,0 +1,13 @@
+#ignore input files
+input/
+#ignore output files
+output/
+#ignore more unwanted files
+home/
+#ignore log files
+logs/
+#logs file
+*.log
+#ignore gatk
+gatk-4.5.0.0/
+
